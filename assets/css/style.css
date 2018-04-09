@@ -1,0 +1,15 @@
+/* Nav Bar Styling */
+.navbar-header {
+  float: left;
+  padding: 15px;
+  text-align: center;
+  width: 100%;
+}
+.navbar-brand {
+  float: none;
+}
+
+.btn {
+  width: 100%;
+  margin: 5px;
+}

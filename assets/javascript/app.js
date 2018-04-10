@@ -8,7 +8,7 @@
 // Add music
 // Add a mute button that floats
 
-var timer, correct, incorrect, key;
+var timer, correct, incorrect, key, madeGuess;
 
 var guesses = $("#aBlock");
 
@@ -20,12 +20,6 @@ var trivia = {
   }
 };
 
-// var Q = {
-//   num: 1,
-//   question: "What is the name of Jon's direwolf?",
-//   A: ["Ghost", "Nymeria", "Summer", "Grey Wind"]
-// };
-
 var answerOptions = [];
 
 // Reset function
@@ -33,7 +27,10 @@ function reset() {
   timer = 30 * 1000;
   correct = 0;
   incorrect = 0;
-  $("#tText").text("00:30");
+  madeGuess = false;
+  $("#tText")
+    .text("00:30")
+    .css("color", "black");
   answerOptions = [];
 }
 
@@ -45,6 +42,8 @@ function start() {
 
 // Selects the next question, randomizes the answers and dynamically creates the buttons
 function newQ() {
+  // Don't want the user clicking on multiple buttons in a single turn
+  madeGuess === false;
   // Ensures the array that holds the answers is clear
   answerOptions = [];
 
@@ -87,31 +86,40 @@ function newQ() {
 
 // Selecting an answer
 guesses.on("click", ".answer", function() {
-  var userGuess = $(this).attr("data-answer");
+  console.log("User made a guess? " + madeGuess);
+  if (madeGuess === false) {
+    madeGuess = true;
+    console.log("User made a guess? " + madeGuess);
+    var userGuess = $(this).attr("data-answer");
 
-  console.log(key);
+    console.log(key);
 
-  // Make the correct button turn green
-  $(guesses)
-    .data(key)
-    .addClass("btn-success")
-    .removeClass("btn-secondary");
+    // Make the correct button turn green
+    $("button[data-answer*=" + key)
+      .addClass("btn-success")
+      .removeClass("btn-secondary");
 
-  // Condition if user guesses correct answer
-  if (userGuess === key) {
-    $("#tText").text("Correct!");
-    correct++;
-  } else {
-    $("#tText").text("Better luck next time...");
-    incorrect++;
+    // Condition if user guesses correct answer
+    if (userGuess === key) {
+      $("#tText")
+        .text("Correct!")
+        .css("color", "green");
+      correct++;
+    } else {
+      $("#tText")
+        .text("Better luck next time...")
+        .css("color", "red");
+      $(this)
+        .addClass("btn-danger")
+        .removeClass("btn-secondary");
+      incorrect++;
+    }
+
+    // Clears buttons after selection is made so we can re-create them dynamically again
+    // setTimeout(function() {
+    //$("button").remove();
+    // }, 3000);
   }
-
-  //alert("You guessed: " + userGuess);
-
-  // Clears buttons after selection is made so we can re-create them dynamically again
-  // setTimeout(function() {
-  //$("button").remove();
-  // }, 3000);
 });
 
 // Mix up the answers

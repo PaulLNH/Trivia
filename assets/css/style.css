@@ -9,6 +9,11 @@
   float: none;
 }
 
+.navbar-dark .navbar-brand {
+  font-size: 2em;
+  font-weight: bold;
+}
+
 .btn {
   width: 100%;
   margin: 5px;

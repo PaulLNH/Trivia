@@ -1,12 +1,30 @@
-var timer, correct, incorrect;
+// Note: As part of this assignment I wanted to challenge myself
+// this challeng was to dynamically create the answer buttons
+// and have them removed every question, I know this is probably
+// not the most efficient way, but this was a skill building exercise
+
+// TO DO:
+// Add background images that cycle on a timer
+// Add music
+// Add a mute button that floats
+
+var timer, correct, incorrect, key;
 
 var guesses = $("#aBlock");
 
-var Q = {
-  num: 1,
-  question: "What is the name of Jon's direwolf?",
-  A: ["Ghost", "Nymeria", "Summer", "Grey Wind"]
+var trivia = {
+  1: {
+    question: "What is the name of Jon's direwolf?",
+    A: ["Ghost", "Nymeria", "Summer", "Grey Wind"],
+    answer: "Ghost"
+  }
 };
+
+// var Q = {
+//   num: 1,
+//   question: "What is the name of Jon's direwolf?",
+//   A: ["Ghost", "Nymeria", "Summer", "Grey Wind"]
+// };
 
 var answerOptions = [];
 
@@ -31,9 +49,14 @@ function newQ() {
   answerOptions = [];
 
   // Fills answerOptions array with possible guesses
-  for (var i = 0; i < Q.A.length; i++) {
+  for (var i = 0; i < trivia[1].A.length; i++) {
     // For each iteration, push answer to answerOptions
-    answerOptions.push(Q.A[i]);
+    answerOptions.push(trivia[1].A[i]);
+
+    // Record the index number of the answer into the key variabe
+    if (trivia[1].A[i] === trivia[1].answer) {
+      key = trivia[1].A[i];
+    }
   }
 
   // Shuffles the answers
@@ -41,8 +64,8 @@ function newQ() {
   console.log(answerOptions);
 
   // Displays the question
-  $("#qText").text(Q.question);
-  
+  $("#qText").text(trivia[1].question);
+
   // Creates an answer button for every answerOption.
   for (var x = 0; x < answerOptions.length; x++) {
     // For each iteration, we will create a button
@@ -61,6 +84,35 @@ function newQ() {
     guesses.append(answerBtn);
   }
 }
+
+// Selecting an answer
+guesses.on("click", ".answer", function() {
+  var userGuess = $(this).attr("data-answer");
+
+  console.log(key);
+
+  // Make the correct button turn green
+  $(guesses)
+    .data(key)
+    .addClass("btn-success")
+    .removeClass("btn-secondary");
+
+  // Condition if user guesses correct answer
+  if (userGuess === key) {
+    $("#tText").text("Correct!");
+    correct++;
+  } else {
+    $("#tText").text("Better luck next time...");
+    incorrect++;
+  }
+
+  //alert("You guessed: " + userGuess);
+
+  // Clears buttons after selection is made so we can re-create them dynamically again
+  // setTimeout(function() {
+  //$("button").remove();
+  // }, 3000);
+});
 
 // Mix up the answers
 function shuffle(array) {
@@ -82,7 +134,9 @@ function shuffle(array) {
   return array;
 }
 
-function startTime() {}
+function startTime() {
+  // Timer function goes here
+}
 
 // Time Converter
 function timeConverter(t) {
@@ -102,25 +156,8 @@ function timeConverter(t) {
   return minutes + ":" + seconds;
 }
 
-// Selecting an answer
-guesses.on("click", ".answer", function() {
-  // Determining the crystal's value requires us to extract the value from the data attribute.
-  // Using the $(this) keyword specifies that we should be extracting the crystal value of the clicked crystal.
-  // Using the .attr("data-crystalvalue") allows us to grab the value out of the "data-crystalvalue" attribute.
-  // Since attributes on HTML elements are strings, we must convert it to an integer before adding to the counter
-
-  var userGuess = $(this).attr("data-answer");
-  // We then add the crystalValue to the user's "counter" which is a global variable.
-  // Every click, from every crystal adds to the global counter.
-
-  // All of the same game win-lose logic applies. So the rest remains unchanged.
-  alert("You guessed: " + userGuess);
-
-  // Clears buttons after selection is made so we can re-create them dynamically again
-  $("button").remove();
-});
-
 window.onload = function() {
   reset();
   newQ();
+  console.log(trivia[1].question);
 };

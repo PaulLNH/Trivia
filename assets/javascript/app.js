@@ -11,7 +11,6 @@
 
 var timer = $("#tText"),
   timeLeft = 5,
-  timeStop,
   timerId = setInterval(countdown, 1000),
   howManyQuestions = 5,
   correct,
@@ -187,7 +186,45 @@ function newRound() {
 
 // Displays stats at the end!
 function roundOver() {
-  // Display stats at the end!
+  // Display stats at the end
+  $("button").remove();
+  $("img").remove();
+  var displayStats = $("<h3>")
+    .text(
+      "You got " +
+        correct +
+        " correct out of " +
+        roundQuestions.length +
+        ". " +
+        correct / roundQuestions.length * 100 +
+        "%"
+    )
+    .appendTo(guesses);
+
+  // Some snarky message about doing better < 40%
+  if (correct / roundQuestions.length < 0.5) {
+    var displayMsg = $("<p>")
+      .text("You don't even watch Game of Thrones do you...")
+      .appendTo(displayStats);
+  }
+  // You better take the test again < 75%
+  if (correct / roundQuestions.length < 0.75 && correct / roundQuestions.length > 0.5) {
+    var displayMsg = $("<p>")
+      .text("You better take the test again, we both know you can do better.")
+      .appendTo(displayStats);
+  }
+  // At least you know more than Jon Snow < 95%
+  if (correct / roundQuestions.length < 0.95 && correct / roundQuestions.length > 0.75) {
+    var displayMsg = $("<p>")
+      .text("At least you know more than Jon Snow...")
+      .appendTo(displayStats);
+  }
+  // Not even Bran knows as much about GoT as you! === 100%
+  if (correct / roundQuestions.length === 1) {
+    var displayMsg = $("<p>")
+      .text("Not even Bran knows as much about Game of Thrones as you!")
+      .appendTo(displayStats);
+  }
 }
 
 // Mix up the answers

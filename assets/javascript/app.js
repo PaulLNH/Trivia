@@ -1,159 +1,193 @@
-// Note: As part of this assignment I wanted to challenge myself
-// this challeng was to dynamically create the answer buttons
-// and have them removed every question, I know this is probably
-// not the most efficient way, but this was a skill building exercise
+// SELF GOALS FOR ASSIGNMENT
+// 1.) Make game mobile friendly / responsive
+// 2.) Make app scalable (more questions, answers, ect)
+// 3.) Work with dynmaicly generated elements
+// 4.) Replay value: give user metrics on how they did, and randomize everything
 
 // TO DO:
 // Add background images that cycle on a timer
 // Add music
 // Add a mute button that floats
 
-var timer, correct, incorrect, key, madeGuess, currentQ;
-
-var guesses = $("#aBlock");
-
-var trivia = {
-  1: {
-    question: "What is the name of Jon's direwolf?",
-    A: ["Ghost", "Nymeria", "Summer", "Grey Wind"],
-    answer: "Ghost"
-  }
-};
-
-var answerOptions = [];
-var roundQuestions = [];
+var timer = $("#tText"),
+  timeLeft = 5,
+  timeStop,
+  timerId = setInterval(countdown, 1000),
+  howManyQuestions = 5,
+  correct,
+  incorrect,
+  key,
+  madeGuess,
+  currentQ,
+  guesses = $("#aBlock"),
+  answerOptions = [],
+  roundQuestions = [];
 
 // Reset function
 function reset() {
-  timer = 30 * 1000;
   correct = 0;
   incorrect = 0;
   madeGuess = false;
   currentQ = 0;
-  $("#tText")
-    .text("00:30")
-    .css("color", "black");
+  timer.text("00:30").css("color", "black");
   answerOptions = [];
   roundQuestions = [];
 }
 
-// The start button is pressed
-function start() {
-  newQ();
-  startTime();
-}
-
 // Selects the next question, randomizes the answers and dynamically creates the buttons
 function newQ() {
+  // Clears buttons
+  $("button").remove();
+  // Clears image
+  $("img").remove();
+  console.log(currentQ);
   // Don't want the user clicking on multiple buttons in a single turn
   madeGuess = false;
-  // Ensures the array that holds the answers is clear
-  answerOptions = [];
 
-  // Fills answerOptions array with possible guesses
-  // Set a variable to iterate
-  for (var i = 0; i < trivia[currentQ].A.length; i++) {
-    // For each iteration, push answer to answerOptions
-    answerOptions.push(trivia[currentQ].A[i]);
+  //////// ENDS GAME IF NO MORE QUESTIONS /////////
+  if (currentQ < roundQuestions.length) {
+    // Ensures the array that holds the answers is clear
+    answerOptions = [];
+    timeLeft = 30;
 
-    // Record the index number of the answer into the key variabe
-    if (trivia[currentQ].A[i] === trivia[currentQ].answer) {
-      key = trivia[currentQ].A[i];
+    // Fills answerOptions array with possible guesses
+    // Set a variable to iterate
+    for (var i = 0; i < roundQuestions[currentQ].A.length; i++) {
+      // For each iteration, push answer to answerOptions
+      answerOptions.push(roundQuestions[currentQ].A[i]);
+
+      // Record the index number of the answer into the key variabe
+      if (roundQuestions[currentQ].A[i] === roundQuestions[currentQ].answer) {
+        key = roundQuestions[currentQ].A[i];
+      }
     }
-  }
 
-  ////////////////////// THIS IS CODE WE CAN BRING BACK TO FIX THE GAME //////////
+    // Shuffles the answers
+    shuffle(answerOptions);
+    console.log(answerOptions);
 
-  // Fills answerOptions array with possible guesses
-  //  for (var i = 0; i < trivia[1].A.length; i++) {
-  // For each iteration, push answer to answerOptions
-  //    answerOptions.push(trivia[1].A[i]);
+    // Displays the question
+    $("#qText").text(roundQuestions[currentQ].question);
 
-  // Record the index number of the answer into the key variabe
-  //     if (trivia[1].A[i] === trivia[1].answer) {
-  //       key = trivia[1].A[i];
-  //     }
-  //   }
-  ////////////////////// THIS IS CODE WE CAN BRING BACK TO FIX THE GAME //////////
+    // Creates an answer button for every answerOption.
+    for (var x = 0; x < answerOptions.length; x++) {
+      // For each iteration, we will create a button
+      var answerBtn = $("<button>");
 
-  // Shuffles the answers
-  shuffle(answerOptions);
-  console.log(answerOptions);
+      // Each button will be given the class for styling ".btn .btn-secondary".
+      answerBtn.addClass("btn btn-secondary answer");
 
-  // Displays the question
-  $("#qText").text(trivia[1].question);
+      // Each answerBtn will be given a data attribute called data-answer which holds it's array index
+      answerBtn.attr("data-answer", answerOptions[x]);
 
-  // Creates an answer button for every answerOption.
-  for (var x = 0; x < answerOptions.length; x++) {
-    // For each iteration, we will create a button
-    var answerBtn = $("<button>");
+      // Adds text to the buttons
+      answerBtn.text(answerOptions[x]);
 
-    // Each crystal will be given the class for styling ".btn .btn-secondary".
-    answerBtn.addClass("btn btn-secondary answer");
-
-    // Each answerBtn will be given a data attribute called data-answer which holds it's array index
-    answerBtn.attr("data-answer", answerOptions[x]);
-
-    // Adds text to the buttons
-    answerBtn.text(answerOptions[x]);
-
-    // Adds each button (with all it classes and attributes) to the page.
-    guesses.append(answerBtn);
+      // Adds each button (with all it classes and attributes) to the page.
+      guesses.append(answerBtn);
+    }
+    // Starts clock
+    countdown();
+  } else {
+    roundOver();
   }
 }
 
 // Selecting an answer
 guesses.on("click", ".answer", function() {
   console.log("User made a guess? " + madeGuess);
-
   // Prevents user from clicking multiple buttons
   if (!madeGuess) {
     madeGuess = true;
-    console.log("User made a guess? " + madeGuess);
+
+    // Assigns the button the user clicked on to userGuess
     var userGuess = $(this).attr("data-answer");
-
-    console.log(key);
-
-    // Make the correct button turn green
-    $("button[data-answer*=" + key)
-      .addClass("btn-success")
-      .removeClass("btn-secondary");
 
     // Condition if user guesses correct answer
     if (userGuess === key) {
-      $("#tText")
-        .text("Correct!")
-        .css("color", "green");
-      correct++;
+      correctGuess();
     } else {
-      $("#tText")
-        .text("Better luck next time...")
-        .css("color", "red");
+      incorrectGuess();
       $(this)
         .addClass("btn-danger")
         .removeClass("btn-secondary");
-      incorrect++;
     }
-
-    // Clears buttons after selection is made so we can re-create them dynamically again
-    // setTimeout(function() {
-    //$("button").remove();
-    // }, 3000);
   }
 });
 
+function correctGuess() {
+  // What happens if user guesses correct.
+  // Stop timer
+  clearTimeout(timerId);
+  // Set text to indicate answer was correct
+  timer.text("Correct!").css("color", "green");
+  // Incriments correct guess
+  correct++;
+  // Runs the correct answer sequence
+  correctAnswer();
+}
+
+function incorrectGuess() {
+  // What happens if user guesses incorrect..
+  // Stop timer
+  clearTimeout(timerId);
+  // Set text to indicate answer was incorrect
+  timer.text("Wrong!").css("color", "red");
+  // Incriment incorect guess
+  incorrect++;
+  // Shows user what the correct answer was
+  correctAnswer();
+}
+
+function correctAnswer() {
+  showAnswer();
+
+  setTimeout(function() {
+    // Display image after 4 seconds
+    $("button").remove();
+    var displayImg = $("<img />")
+      .attr({
+        src: roundQuestions[currentQ].img,
+        width: "100%",
+        height: "auto"
+      })
+      .appendTo(guesses);
+    setTimeout(function() {
+      // Moves on to the next question
+      currentQ++;
+      newQ();
+    }, 3000);
+  }, 4000);
+}
+
+// Displays the correct answer
+function showAnswer() {
+  // Converts to a string to prevent errors on answers with spaces
+  var answerKey = JSON.stringify(key);
+  // Turns correct button green
+  $("button[data-answer*=" + answerKey)
+    .addClass("btn-success")
+    .removeClass("btn-secondary");
+}
+
 // Randomize questions
 function newRound() {
+  roundQuestions = [];
   // Logic to pick 15 questions
-  while (roundQuestions.length < 15) {
-    // Select a random number the length of the trivia questions
-    var i = Math.floor(Math.random() * trivia.length);
+  while (roundQuestions.length < howManyQuestions) {
+    // Select a random number that represents the trivia array
+    var i = Math.floor(Math.random() * Object.keys(trivia).length);
+    // If that index is not in the array, add it to the array
     if (roundQuestions.indexOf(trivia[i]) === -1) {
       // Add trivia question to round questions
       roundQuestions.push(trivia[i]);
     }
   }
-  console.log(roundQuestions);
+}
+
+// Displays stats at the end!
+function roundOver() {
+  // Display stats at the end!
 }
 
 // Mix up the answers
@@ -176,8 +210,28 @@ function shuffle(array) {
   return array;
 }
 
-function startTime() {
-  // Timer function goes here
+// Countdown timer
+function countdown() {
+  if (timeLeft == -1) {
+    console.log("times up!");
+    timesUp();
+    clearTimeout(timerId);
+  } else {
+    timer.text(timeConverter(timeLeft));
+    timeLeft--;
+    if (timeLeft < 5) {
+      timer.css("color", "red");
+    }
+  }
+}
+
+function timesUp() {
+  // Don't want the user selecting the answer after they are shown!
+  madeGuess = true;
+  console.log("times up function was called");
+  timer.text("Out of time!").css("color", "red");
+  // Show user what the correct answer was
+  correctAnswer();
 }
 
 // Time Converter
@@ -198,8 +252,15 @@ function timeConverter(t) {
   return minutes + ":" + seconds;
 }
 
+// The start button is pressed
+function start() {
+  // Starrting function
+}
+
 window.onload = function() {
   reset();
+  newRound();
   newQ();
-  console.log(trivia[1].question);
+  console.log(key);
+  console.log(roundQuestions);
 };

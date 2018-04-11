@@ -39,14 +39,17 @@ function newQ() {
   $("button").remove();
   // Clears image
   $("img").remove();
-  console.log(currentQ);
+
   // Don't want the user clicking on multiple buttons in a single turn
   madeGuess = false;
 
   //////// ENDS GAME IF NO MORE QUESTIONS /////////
   if (currentQ < roundQuestions.length) {
+
     // Ensures the array that holds the answers is clear
     answerOptions = [];
+
+    // Puts 30 seconds on the clock
     timeLeft = 30;
 
     // Fills answerOptions array with possible guesses
@@ -63,7 +66,6 @@ function newQ() {
 
     // Shuffles the answers
     shuffle(answerOptions);
-    console.log(answerOptions);
 
     // Displays the question
     $("#qText").text(roundQuestions[currentQ].question);
@@ -94,7 +96,6 @@ function newQ() {
 
 // Selecting an answer
 guesses.on("click", ".answer", function() {
-  console.log("User made a guess? " + madeGuess);
   // Prevents user from clicking multiple buttons
   if (!madeGuess) {
     madeGuess = true;
@@ -172,14 +173,14 @@ function showAnswer() {
 // Randomize questions
 function newRound() {
   roundQuestions = [];
-  // Logic to pick 15 questions
+  // Logic to pick questions for a new round
   while (roundQuestions.length < howManyQuestions) {
     // Select a random number that represents the trivia array
-    var i = Math.floor(Math.random() * Object.keys(trivia).length);
+    var r = Math.floor(Math.random() * Object.keys(trivia).length);
     // If that index is not in the array, add it to the array
-    if (roundQuestions.indexOf(trivia[i]) === -1) {
+    if (roundQuestions.indexOf(trivia[r]) === -1) {
       // Add trivia question to round questions
-      roundQuestions.push(trivia[i]);
+      roundQuestions.push(trivia[r]);
     }
   }
 }
@@ -250,9 +251,8 @@ function shuffle(array) {
 // Countdown timer
 function countdown() {
   if (timeLeft == -1) {
-    console.log("times up!");
-    timesUp();
     clearTimeout(timerId);
+    timesUp();
   } else {
     timer.text(timeConverter(timeLeft));
     timeLeft--;
@@ -265,7 +265,6 @@ function countdown() {
 function timesUp() {
   // Don't want the user selecting the answer after they are shown!
   madeGuess = true;
-  console.log("times up function was called");
   timer.text("Out of time!").css("color", "red");
   // Show user what the correct answer was
   correctAnswer();
@@ -298,6 +297,4 @@ window.onload = function() {
   reset();
   newRound();
   newQ();
-  console.log(key);
-  console.log(roundQuestions);
 };

@@ -8,7 +8,7 @@
 // Add music
 // Add a mute button that floats
 
-var timer, correct, incorrect, key, madeGuess;
+var timer, correct, incorrect, key, madeGuess, currentQ;
 
 var guesses = $("#aBlock");
 
@@ -21,6 +21,7 @@ var trivia = {
 };
 
 var answerOptions = [];
+var roundQuestions = [];
 
 // Reset function
 function reset() {
@@ -28,10 +29,12 @@ function reset() {
   correct = 0;
   incorrect = 0;
   madeGuess = false;
+  currentQ = 0;
   $("#tText")
     .text("00:30")
     .css("color", "black");
   answerOptions = [];
+  roundQuestions = [];
 }
 
 // The start button is pressed
@@ -43,20 +46,35 @@ function start() {
 // Selects the next question, randomizes the answers and dynamically creates the buttons
 function newQ() {
   // Don't want the user clicking on multiple buttons in a single turn
-  madeGuess === false;
+  madeGuess = false;
   // Ensures the array that holds the answers is clear
   answerOptions = [];
 
   // Fills answerOptions array with possible guesses
-  for (var i = 0; i < trivia[1].A.length; i++) {
+  // Set a variable to iterate
+  for (var i = 0; i < trivia[currentQ].A.length; i++) {
     // For each iteration, push answer to answerOptions
-    answerOptions.push(trivia[1].A[i]);
+    answerOptions.push(trivia[currentQ].A[i]);
 
     // Record the index number of the answer into the key variabe
-    if (trivia[1].A[i] === trivia[1].answer) {
-      key = trivia[1].A[i];
+    if (trivia[currentQ].A[i] === trivia[currentQ].answer) {
+      key = trivia[currentQ].A[i];
     }
   }
+
+  ////////////////////// THIS IS CODE WE CAN BRING BACK TO FIX THE GAME //////////
+
+  // Fills answerOptions array with possible guesses
+  //  for (var i = 0; i < trivia[1].A.length; i++) {
+  // For each iteration, push answer to answerOptions
+  //    answerOptions.push(trivia[1].A[i]);
+
+  // Record the index number of the answer into the key variabe
+  //     if (trivia[1].A[i] === trivia[1].answer) {
+  //       key = trivia[1].A[i];
+  //     }
+  //   }
+  ////////////////////// THIS IS CODE WE CAN BRING BACK TO FIX THE GAME //////////
 
   // Shuffles the answers
   shuffle(answerOptions);
@@ -87,7 +105,9 @@ function newQ() {
 // Selecting an answer
 guesses.on("click", ".answer", function() {
   console.log("User made a guess? " + madeGuess);
-  if (madeGuess === false) {
+
+  // Prevents user from clicking multiple buttons
+  if (!madeGuess) {
     madeGuess = true;
     console.log("User made a guess? " + madeGuess);
     var userGuess = $(this).attr("data-answer");
@@ -121,6 +141,20 @@ guesses.on("click", ".answer", function() {
     // }, 3000);
   }
 });
+
+// Randomize questions
+function newRound() {
+  // Logic to pick 15 questions
+  while (roundQuestions.length < 15) {
+    // Select a random number the length of the trivia questions
+    var i = Math.floor(Math.random() * trivia.length);
+    if (roundQuestions.indexOf(trivia[i]) === -1) {
+      // Add trivia question to round questions
+      roundQuestions.push(trivia[i]);
+    }
+  }
+  console.log(roundQuestions);
+}
 
 // Mix up the answers
 function shuffle(array) {

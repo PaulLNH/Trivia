@@ -90,7 +90,7 @@ function newQ() {
 }
 
 // Selecting an answer
-guesses.on("click", ".answer", function() {
+guesses.on("click touchstart", ".answer", function() {
   // Prevents user from clicking multiple buttons
   if (!madeGuess) {
     madeGuess = true;
@@ -327,7 +327,7 @@ function start(btnText) {
   guesses.append(startBtn);
   // Make button clickable
   // Selecting an answer
-  guesses.on("click", ".start", function() {
+  guesses.on("click touchstart", ".start", function() {
     // Game on!
     reset();
     newRound();

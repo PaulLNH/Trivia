@@ -4,15 +4,10 @@
 // 3.) Work with dynmaicly generated elements
 // 4.) Replay value: give user metrics on how they did, and randomize everything
 
-// TO DO:
-// Add background images that cycle on a timer
-// Add music
-// Add a mute button that floats
-
-var timer = $("#tText"),
-  timeLeft = 5,
-  timerId = setInterval(countdown, 1000),
-  howManyQuestions = 5,
+var display = $("#tText"),
+  timer = 15,
+  intervalId,
+  howManyQuestions = 15,
   correct,
   incorrect,
   key,
@@ -28,7 +23,7 @@ function reset() {
   incorrect = 0;
   madeGuess = false;
   currentQ = 0;
-  timer.text("00:30").css("color", "black");
+  display.text("00:30").css("color", "black");
   answerOptions = [];
   roundQuestions = [];
 }
@@ -39,18 +34,17 @@ function newQ() {
   $("button").remove();
   // Clears image
   $("img").remove();
+  // Clears paragraphs from previous round
+  $("p").remove();
+  $("h4").remove();
 
   // Don't want the user clicking on multiple buttons in a single turn
   madeGuess = false;
 
   //////// ENDS GAME IF NO MORE QUESTIONS /////////
   if (currentQ < roundQuestions.length) {
-
     // Ensures the array that holds the answers is clear
     answerOptions = [];
-
-    // Puts 30 seconds on the clock
-    timeLeft = 30;
 
     // Fills answerOptions array with possible guesses
     // Set a variable to iterate
@@ -87,8 +81,9 @@ function newQ() {
       // Adds each button (with all it classes and attributes) to the page.
       guesses.append(answerBtn);
     }
-    // Starts clock
-    countdown();
+    // Puts 30 seconds on clock
+    timer = 15;
+    run();
   } else {
     roundOver();
   }
@@ -118,9 +113,9 @@ guesses.on("click", ".answer", function() {
 function correctGuess() {
   // What happens if user guesses correct.
   // Stop timer
-  clearTimeout(timerId);
+  stop();
   // Set text to indicate answer was correct
-  timer.text("Correct!").css("color", "green");
+  display.text("Correct!").css("color", "green");
   // Incriments correct guess
   correct++;
   // Runs the correct answer sequence
@@ -130,9 +125,9 @@ function correctGuess() {
 function incorrectGuess() {
   // What happens if user guesses incorrect..
   // Stop timer
-  clearTimeout(timerId);
+  stop();
   // Set text to indicate answer was incorrect
-  timer.text("Wrong!").css("color", "red");
+  display.text("Wrong!").css("color", "red");
   // Incriment incorect guess
   incorrect++;
   // Shows user what the correct answer was
@@ -155,9 +150,10 @@ function correctAnswer() {
     setTimeout(function() {
       // Moves on to the next question
       currentQ++;
+      // Assigns a new question
       newQ();
-    }, 3000);
-  }, 4000);
+    }, 2000);
+  }, 2000);
 }
 
 // Displays the correct answer
@@ -190,15 +186,16 @@ function roundOver() {
   // Display stats at the end
   $("button").remove();
   $("img").remove();
-  var displayStats = $("<h3>")
+  var displayStats = $("<h4>")
     .text(
       "You got " +
         correct +
         " correct out of " +
         roundQuestions.length +
-        ". " +
-        correct / roundQuestions.length * 100 +
-        "%"
+        " " +
+        "(" +
+        Math.floor(correct / roundQuestions.length * 100) +
+        "% )"
     )
     .appendTo(guesses);
 
@@ -206,25 +203,35 @@ function roundOver() {
   if (correct / roundQuestions.length < 0.5) {
     var displayMsg = $("<p>")
       .text("You don't even watch Game of Thrones do you...")
-      .appendTo(displayStats);
+      .appendTo(guesses);
+    start("No, but I want to learn!");
   }
   // You better take the test again < 75%
-  if (correct / roundQuestions.length < 0.75 && correct / roundQuestions.length > 0.5) {
+  if (
+    correct / roundQuestions.length < 0.75 &&
+    correct / roundQuestions.length > 0.5
+  ) {
     var displayMsg = $("<p>")
-      .text("You better take the test again, we both know you can do better.")
-      .appendTo(displayStats);
+      .text("Try again, we both know you can do better...")
+      .appendTo(guesses);
+    start("You're right, I can do better!");
   }
   // At least you know more than Jon Snow < 95%
-  if (correct / roundQuestions.length < 0.95 && correct / roundQuestions.length > 0.75) {
+  if (
+    correct / roundQuestions.length < 0.95 &&
+    correct / roundQuestions.length > 0.75
+  ) {
     var displayMsg = $("<p>")
       .text("At least you know more than Jon Snow...")
-      .appendTo(displayStats);
+      .appendTo(guesses);
+    start("Sigh... I'll try again.");
   }
   // Not even Bran knows as much about GoT as you! === 100%
   if (correct / roundQuestions.length === 1) {
     var displayMsg = $("<p>")
       .text("Not even Bran knows as much about Game of Thrones as you!")
-      .appendTo(displayStats);
+      .appendTo(guesses);
+    start("Even though I aced it, I'll play again!");
   }
 }
 
@@ -248,29 +255,49 @@ function shuffle(array) {
   return array;
 }
 
-// Countdown timer
-function countdown() {
-  if (timeLeft == -1) {
-    clearTimeout(timerId);
-    timesUp();
+// Runs countdown timer
+function run() {
+  clearInterval(intervalId);
+  intervalId = setInterval(decrement, 1000);
+}
+
+//  The decrement function
+function decrement() {
+  //  Decrease number by one.
+  timer--;
+  //  If player has over 5 seconds, show black
+  if (timer > 5) {
+    display.text(timeConverter(timer)).css("color", "black");
   } else {
-    timer.text(timeConverter(timeLeft));
-    timeLeft--;
-    if (timeLeft < 5) {
-      timer.css("color", "red");
-    }
+    // If player has less than 5 seconds, turn up intensity and make red
+    display.text(timeConverter(timer)).css("color", "red");
+  }
+
+  //  Once number hits zero...
+  if (timer <= 0) {
+    // Stops timer
+    stop();
+    // Alerts user time is up
+    timesUp();
   }
 }
 
+//  Stops the timer
+function stop() {
+  //  Clears our intervalId and stops the countdown
+  clearInterval(intervalId);
+}
+
+// This runs when the player is out of time
 function timesUp() {
   // Don't want the user selecting the answer after they are shown!
   madeGuess = true;
-  timer.text("Out of time!").css("color", "red");
+  display.text("Out of time!").css("color", "red");
   // Show user what the correct answer was
   correctAnswer();
 }
 
-// Time Converter
+// Time Converter to show the time in a logical format
 function timeConverter(t) {
   var minutes = Math.floor(t / 60);
   var seconds = t - minutes * 60;
@@ -289,12 +316,37 @@ function timeConverter(t) {
 }
 
 // The start button is pressed
-function start() {
-  // Starrting function
+function start(btnText) {
+  // Create a start button
+  var startBtn = $("<button>");
+  // Add class for styling ".btn .btn-primary".
+  startBtn.addClass("btn btn-primary start");
+  // Adds text to the button
+  startBtn.text(btnText);
+  // Adds button to the #aBlock
+  guesses.append(startBtn);
+  // Make button clickable
+  // Selecting an answer
+  guesses.on("click", ".start", function() {
+    // Game on!
+    reset();
+    newRound();
+    newQ();
+  });
 }
 
 window.onload = function() {
-  reset();
-  newRound();
-  newQ();
+  // Initial message to user
+  display.text("Think you know Game of Thrones?");
+  var displayMsg = $("<p>")
+    .text(
+      "Try to answer " +
+        howManyQuestions +
+        " Got questions in " +
+        timer +
+        "sec each."
+    )
+    .appendTo(guesses);
+  // Starting button
+  start("Start Trivia Game!");
 };

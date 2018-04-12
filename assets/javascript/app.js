@@ -5,9 +5,10 @@
 // 4.) Replay value: give user metrics on how they did, and randomize everything
 
 var display = $("#tText"),
-    timer = 15,
+    howManyQuestions = 15, // Change this variable to the number of questions you want per round
+    timeToAnswer = 15, // Change this variable to set the countdown timer in seconds
+    timer,
     intervalId,
-    howManyQuestions = 15,
     correct,
     incorrect,
     key,
@@ -81,8 +82,8 @@ function newQ() {
             // Adds each button (with all it classes and attributes) to the page.
             guesses.append(answerBtn);
         }
-        // Puts 30 seconds on clock
-        timer = 15;
+        // Puts time on clock
+        timer = timeToAnswer;
         run();
     } else {
         roundOver();

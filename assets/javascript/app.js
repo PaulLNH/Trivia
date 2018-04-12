@@ -90,7 +90,7 @@ function newQ() {
 }
 
 // Selecting an answer
-guesses.on("click touchstart", ".answer", function() {
+guesses.on("touchstart click", ".answer", function() {
   // Prevents user from clicking multiple buttons
   if (!madeGuess) {
     madeGuess = true;
@@ -327,7 +327,7 @@ function start(btnText) {
   guesses.append(startBtn);
   // Make button clickable
   // Selecting an answer
-  guesses.on("click touchstart", ".start", function() {
+  guesses.on("touchstart click", ".start", function() {
     // Game on!
     reset();
     newRound();
@@ -335,7 +335,7 @@ function start(btnText) {
   });
 }
 
-window.onload = function() {
+$(document).ready(function() {
   // Initial message to user
   display.text("Think you know Game of Thrones?");
   var displayMsg = $("<p>")
@@ -349,4 +349,4 @@ window.onload = function() {
     .appendTo(guesses);
   // Starting button
   start("Start Trivia Game!");
-};
+});

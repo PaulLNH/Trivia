@@ -24,7 +24,6 @@ function reset() {
     incorrect = 0;
     madeGuess = false;
     currentQ = 0;
-    display.text("00:15").css("color", "black");
     answerOptions = [];
     roundQuestions = [];
 }
